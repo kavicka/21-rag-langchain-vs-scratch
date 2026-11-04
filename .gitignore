@@ -4,5 +4,13 @@ __pycache__/
 .DS_Store
 mlruns/
 .pytest_cache/
+.ruff_cache/
 data/
 models/
+# secrets: only .env.example is committed
+.env
+.env.*
+!.env.example
+logs/
+frontend/node_modules/
+frontend/dist/
