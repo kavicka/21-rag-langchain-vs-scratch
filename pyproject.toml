@@ -1,17 +1,56 @@
 [project]
-name = "nn-short-name"
+name = "rag-langchain-vs-scratch"
 version = "0.1.0"
-description = "One-line description of the step"
+description = "Step 21: the RAG from step 15 rebuilt with LangChain/LangGraph and compared on the same eval"
 requires-python = ">=3.12"
 dependencies = [
-    "matplotlib>=3.11.2",
-    "numpy>=2.5.4",
+    # step 15 (scratch pipeline, vendored in rag/)
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "httpx>=0.28",
+    "pydantic-settings>=2.6",
+    "qdrant-client>=1.12",
+    "sentence-transformers>=3.3",
+    "transformers>=4.51",
+    "numpy>=2.1",
+    "matplotlib>=3.9",
+    # LangChain stack (lc/)
+    "langchain>=1.0",
+    "langchain-core>=1.0",
+    "langchain-classic>=1.0",
+    "langchain-community>=0.4",
+    "langchain-text-splitters>=1.0",
+    "langchain-huggingface>=1.0",
+    "langchain-qdrant>=1.0",
+    "langgraph>=1.0",
+    "rank-bm25>=0.2.2",
+]
+
+[project.optional-dependencies]
+ollama = [
+    "langchain-ollama>=1.1.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.17.3",
+    "ruff>=0.8",
+    "pytest>=8.3",
+]
+judge = [
+    "ragas>=0.4.3",
+]
+trace = [
+    "arize-phoenix>=14.6.0",
+    "openinference-instrumentation-langchain>=0.1.81",
 ]
 
 [tool.ruff]
 line-length = 120
+extend-exclude = ["frontend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

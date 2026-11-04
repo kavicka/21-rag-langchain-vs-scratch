@@ -6,6 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: uv sync
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
+      # lint needs only ruff; the full environment (torch, models) is several GB
+      - run: uv sync --only-dev
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync ruff format --check .
