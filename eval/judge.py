@@ -76,6 +76,22 @@ def _ragas_shim() -> None:
             sys.modules[mod] = m
 
 
+def sensitivity(scored: list[dict]) -> dict:
+    """Agreement at other cut-offs. Only ≥ 0.5 was fixed before the run; the others were added after seeing
+    that the scores pile up exactly on 0.5 and 0.67, to show how much the verdict depends on the cut-off."""
+    rule = [x["rule"] for x in scored]
+    out = {}
+    for name, f in [(">=0.5", lambda v: v >= 0.5), (">0.5", lambda v: v > 0.5), (">=0.75", lambda v: v >= 0.75)]:
+        judge = [f(x["score"]) for x in scored]
+        out[name] = {
+            "agreement": round(sum(j == r for j, r in zip(judge, rule, strict=True)) / len(scored), 3),
+            "kappa": kappa(judge, rule),
+            "rule_wrong_judge_correct": sum(j and not r for j, r in zip(judge, rule, strict=True)),
+            "rule_correct_judge_wrong": sum(r and not j for j, r in zip(judge, rule, strict=True)),
+        }
+    return out
+
+
 def sync_only(chat):
     """ragas calls the model with agenerate(); ChatHuggingFace over a local pipeline raises NotImplementedError
     there. BaseChatModel's default async path runs the sync one in a thread, so a thin delegate is enough."""
@@ -173,6 +189,7 @@ def main() -> None:
         "date": datetime.now(UTC).isoformat(timespec="seconds"),
         "hardware": hardware(),
     }
+    out["threshold_sensitivity"] = sensitivity(scored)
     (RUNS / f"judge_{args.pipeline}.jsonl").write_text("".join(json.dumps(x) + "\n" for x in rows))
     print(json.dumps(out, indent=1))
     print("disagreements:", disagree)
